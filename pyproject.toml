@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-template-simplify"
-version = "1.0.1"
+version = "1.0.2"
 description = "A set of tools to help simplify your Django templates."
 authors = ["Michael Yin <michaelyin@accordbox.com>"]
 license = "MIT"
