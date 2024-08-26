@@ -1,9 +1,9 @@
 import pytest
 from django.template import Context, Template
 
+from template_simplify import dom_id
 from tests.testapp.models import TodoItem
 from tests.utils import assert_dom_equal
-from template_simplify import dom_id
 
 pytestmark = pytest.mark.django_db
 
@@ -70,4 +70,3 @@ class TestClassNames:
             output,
             '<div class="test1 test2 test3 ring-slate-900/5 dark:bg-slate-800"></div>',
         )
-
