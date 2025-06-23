@@ -54,4 +54,15 @@ Inspired by JS [classnames](https://www.npmjs.com/package/classnames) and Rails 
 '<div class="test1 test2 ring-slate-900/5 dark:bg-slate-800 %}"></div>'
 ```
 
-It can also work well with TailwindCSS's some special char such as `/` and `:`
+It can work well with TailwindCSS's some special char such as `/` and `:`
+
+Below is an example of `if else`
+
+```html
+<div class="{% class_names active=request.user.is_authenticated inactive=!request.user.is_authenticated %}"></div>
+```
+
+1. Please note `!` can be used just like Javascript.
+2. So if user is not authenticated in this case, we would get `<div class="inactive"></div>`
+
+This can help make css logic more organized.
