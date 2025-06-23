@@ -99,28 +99,44 @@ def class_names(parser, token):
 
     css_ls = []
     css_dict = {}
+    css_not_dict = {}
+
     for pair in attr_list:
         attribute_match = ATTRIBUTE_RE.match(pair) or VALUE_RE.match(pair)
 
         if attribute_match:
             dct = attribute_match.groupdict()
             attr = dct.get("attr", None)
-            # sign = dct.get("sign", None)
-            value = parser.compile_filter(dct["value"])
+            from_not_expression = False
+
+            if (
+                isinstance(dct["value"], str)
+                and len(dct["value"]) > 1
+                and dct["value"][0] == "!"
+            ):
+                from_not_expression = True
+                value = parser.compile_filter(dct["value"][1:])
+            else:
+                value = parser.compile_filter(dct["value"])
+
             if attr:
-                css_dict[attr] = value
+                if not from_not_expression:
+                    css_dict[attr] = value
+                else:
+                    css_not_dict[attr] = value
             else:
                 css_ls.append(value)
         else:
             raise TemplateSyntaxError("class_names found supported token: " + f"{pair}")
 
-    return ClassNamesNode(css_ls=css_ls, css_dict=css_dict)
+    return ClassNamesNode(css_ls=css_ls, css_dict=css_dict, css_not_dict=css_not_dict)
 
 
 class ClassNamesNode(Node):
-    def __init__(self, css_ls, css_dict):
+    def __init__(self, css_ls, css_dict, css_not_dict):
         self.css_ls = css_ls
         self.css_dict = css_dict
+        self.css_not_dict = css_not_dict
 
     def render(self, context):
         final_css = []
@@ -133,6 +149,11 @@ class ClassNamesNode(Node):
         for attr, expression in self.css_dict.items():
             real_value = expression.resolve(context)
             if real_value:
+                final_css.append(attr)
+
+        for attr, expression in self.css_not_dict.items():
+            real_value = expression.resolve(context)
+            if not real_value:
                 final_css.append(attr)
 
         return " ".join(final_css)

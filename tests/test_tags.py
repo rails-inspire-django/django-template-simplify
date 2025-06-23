@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import AnonymousUser, User
 from django.template import Context, Template
 
 from template_simplify import dom_id
@@ -69,4 +70,37 @@ class TestClassNames:
         assert_dom_equal(
             output,
             '<div class="test1 test2 test3 ring-slate-900/5 dark:bg-slate-800"></div>',
+        )
+
+    def test_not_operation(self, rf):
+        request = rf.get("/pytest-path/")
+
+        request.user = AnonymousUser()
+
+        template = """
+        {% load template_simplify %}
+
+        <div class="{% class_names active=request.user.is_authenticated inactive=!request.user.is_authenticated %}"></div>
+        """
+
+        output = render(template, {"request": request}).strip()
+        assert_dom_equal(
+            output,
+            '<div class="inactive"></div>',
+        )
+
+        request.user = User.objects.create_user(
+            username="testuser", password="password"
+        )
+
+        template = """
+        {% load template_simplify %}
+
+        <div class="{% class_names active=request.user.is_authenticated inactive=!request.user.is_authenticated %}"></div>
+        """
+
+        output = render(template, {"request": request}).strip()
+        assert_dom_equal(
+            output,
+            '<div class="active"></div>',
         )
